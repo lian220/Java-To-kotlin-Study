@@ -11,7 +11,7 @@ class User constructor(
         val age: Int?,
 
         @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-        private val userLoanHistories: MutableList<UserLoanHistory> = mutableListOf(),
+        val userLoanHistories: MutableList<UserLoanHistory> = mutableListOf(),
 
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
@@ -27,7 +27,7 @@ class User constructor(
     }
 
     fun loanBook(book: Book) {
-        this.userLoanHistories.add(UserLoanHistory(this, book.name, false))
+        this.userLoanHistories.add(UserLoanHistory(this, book.name))
     }
 
     fun returnBook(bookName: String) {
