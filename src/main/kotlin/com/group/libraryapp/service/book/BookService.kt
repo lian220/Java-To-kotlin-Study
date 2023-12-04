@@ -8,6 +8,7 @@ import com.group.libraryapp.domain.user.loanhistory.UserLoanStatus
 import com.group.libraryapp.dto.book.BookLoanRequest
 import com.group.libraryapp.dto.book.BookRequest
 import com.group.libraryapp.dto.book.BookReturnRequest
+import com.group.libraryapp.dto.book.BookStatResponse
 import com.group.libraryapp.util.fail
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,26 +20,47 @@ class BookService(
     private val userLoanHistoryRepository: UserLoanHistoryRepository
 ) {
 
-    @Transactional
-    fun saveBook(request: BookRequest) {
-        val book = Book(request.name, request.type)
-        bookRepository.save(book)
-    }
+  @Transactional
+  fun saveBook(request: BookRequest) {
+    val book = Book(request.name, request.type)
+    bookRepository.save(book)
+  }
 
-    @Transactional
-    fun loanBook(request: BookLoanRequest) {
-        val book = bookRepository.findByName(request.bookName) ?: fail()
-        if(userLoanHistoryRepository.findByBookNameAndStatus(request.bookName, UserLoanStatus.LOANED) != null) {
-            throw IllegalArgumentException("진작 대출되어 있는 책입니다")
-        }
-        val user = userRepository.findByName(request.userName) ?: fail()
-        user.loanBook(book)
-
+  @Transactional
+  fun loanBook(request: BookLoanRequest) {
+    val book = bookRepository.findByName(request.bookName) ?: fail()
+    if (userLoanHistoryRepository.findByBookNameAndStatus(request.bookName, UserLoanStatus.LOANED) != null) {
+      throw IllegalArgumentException("진작 대출되어 있는 책입니다")
     }
+    val user = userRepository.findByName(request.userName) ?: fail()
+    user.loanBook(book)
 
-    @Transactional
-    fun returnBook(request: BookReturnRequest) {
-        val user = userRepository.findByName(request.userName) ?: fail()
-        user.returnBook(request.bookName)
-    }
+  }
+
+  @Transactional
+  fun returnBook(request: BookReturnRequest) {
+    val user = userRepository.findByName(request.userName) ?: fail()
+    user.returnBook(request.bookName)
+  }
+
+  @Transactional(readOnly = true)
+  fun countLoanedBook(): Int {
+    return userLoanHistoryRepository.countByStatus(UserLoanStatus.LOANED).toInt()
+  }
+
+  @Transactional(readOnly = true)
+  fun getBookStatistics(): List<BookStatResponse> {
+    return bookRepository.getStatus()
+//    return bookRepository.findAll() // List<Book>
+//        .groupBy { book -> book.type } //Map<BookType, List<Book>>
+//        .map { (type, books) -> BookStatResponse(type, books.size) }
+//    val results = mutableListOf<BookStatResponse>()
+//    val books = bookRepository.findAll()
+//    for (book in books) {
+//      results.firstOrNull { dto -> book.type == dto.type }
+//          ?. plusOne()
+//          ?: results.add(BookStatResponse(book.type, 1))
+//    }
+//    return results
+  }
 }

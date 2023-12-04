@@ -129,7 +129,7 @@ class UserServiceTest @Autowired constructor(
         val savedUsers = userRepository.saveAll(listOf(
                 User("A", null),
                 User("B", null),
-        ) )
+        ))
         userLoanHistoryRepository.saveAll(listOf(
                 UserLoanHistory.fixture(savedUsers[0], "책1", UserLoanStatus.LOANED),
                 UserLoanHistory.fixture(savedUsers[0], "책2", UserLoanStatus.LOANED),
